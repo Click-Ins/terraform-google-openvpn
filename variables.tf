@@ -125,3 +125,9 @@ variable "dns_servers" {
     error_message = "The variable 'var.dns_servers' should be an array with 1 or 2 DNS entries only."
   }
 }
+
+variable "shielded_vm" {
+  type        = bool
+  description = "Enable shielded VM on the openvpn server (recommended)"
+  default     = true
+}

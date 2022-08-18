@@ -85,6 +85,7 @@ Adapted from: [gcp-ovpn-tf-module](https://github.com/DeimosCloud/terraform-goog
 | <a name="input_remote_user"></a> [remote\_user](#input\_remote\_user) | The user to operate as on the VM. SSH Key is generated for this user | `string` | `"ubuntu"` | no |
 | <a name="input_route_only_private_ips"></a> [route\_only\_private\_ips](#input\_route\_only\_private\_ips) | Routes only private IPs through the VPN (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16) | `bool` | `false` | no |
 | <a name="input_service_account"></a> [service\_account](#input\_service\_account) | Service account to attach to the instance. See https://www.terraform.io/docs/providers/google/r/compute_instance_template.html#service_account. | <pre>object({<br>    email  = string,<br>    scopes = set(string)<br>  })</pre> | <pre>{<br>  "email": null,<br>  "scopes": []<br>}</pre> | no |
+| <a name="input_shielded_vm"></a> [shielded\_vm](#input\_shielded\_vm) | Enable shielded VM on the openvpn server (recommended) | `bool` | `true` | no |
 | <a name="input_subnetwork"></a> [subnetwork](#input\_subnetwork) | The name of the subnetwork to attach this interface to. The subnetwork must exist in the same region this instance will be created in. Either network or subnetwork must be provided. | `any` | `null` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | network tags to attach to the instance | `list` | `[]` | no |
 | <a name="input_users"></a> [users](#input\_users) | list of user to create | `list(string)` | `[]` | no |

@@ -98,23 +98,16 @@ module "instance_template" {
   source  = "terraform-google-modules/vm/google//modules/instance_template"
   version = "~> 7.3"
 
-  name_prefix        = "openvpn-${var.name}-"
-  project_id         = var.project
-  machine_type       = var.machine_type
-  disk_size_gb       = var.disk_size_gb
-  disk_type          = var.disk_type
-  subnetwork         = var.subnet
-  subnetwork_project = local.host_project_id
-  metadata           = local.metadata
-  service_account = {
-    email  = local.service_account_email
-    scopes = var.scopes
-  }
-  enable_shielded_vm   = var.shielded_vm
-  source_image         = var.image
-  source_image_family  = var.image_family
-  source_image_project = var.image_project
-  preemptible          = var.preemptible
+  name_prefix         = "openvpn-${var.name}-"
+  project_id          = var.project_id
+  machine_type        = var.machine_type
+  disk_size_gb        = var.disk_size_gb
+  disk_type           = var.disk_type
+  subnetwork          = var.subnetwork
+  subnetwork_project  = local.host_project_id
+  metadata            = local.metadata
+  enable_shielded_vm  = var.shielded_vm
+  source_image_family = var.image_family
 
   startup_script = <<SCRIPT
     curl -O ${var.install_script_url}
