@@ -8,13 +8,13 @@ A terraform module to setup OpenVPN on GCP.
 module "openvpn" {
   source     = "git@github.com:click-ins/terraform-google-openvpn.git?ref=main"
 
-  name            = var.name
-  region          = var.region
-  project_id      = var.project_id
-  host_project_id = var.network_project_id
-  network         = var.network
-  subnetwork      = var.public_subnetwork
-  users           = ["john", "Anna"]
+  name                = var.name
+  region              = var.region
+  project_id          = var.project_id
+  network_project_id  = var.network_project_id
+  network             = var.network
+  subnetwork          = var.public_subnetwork
+  users               = ["john", "Anna"]
 }
 
 ```

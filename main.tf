@@ -22,8 +22,10 @@ locals {
 }
 
 resource "google_compute_firewall" "allow-external-ssh" {
-  name    = "openvpn-${var.name}-allow-external-ssh"
-  network = var.network
+  name        = "openvpn-${var.name}-allow-external-ssh"
+  project     = local.host_project_id
+  network     = var.network
+  description = "Allow port 22 on openvpn server"
 
   allow {
     protocol = "tcp"
@@ -36,6 +38,7 @@ resource "google_compute_firewall" "allow-external-ssh" {
 
 resource "google_compute_firewall" "allow-openvpn-udp-port" {
   name        = "openvpn-${var.name}-allow"
+  project     = local.host_project_id
   network     = var.network
   description = "Creates firewall rule targeting the openvpn instance"
 
@@ -103,7 +106,7 @@ module "instance_template" {
   source  = "terraform-google-modules/vm/google//modules/instance_template"
   version = "~> 7.3"
 
-  name_prefix         = "openvpn-${var.name}-"
+  name_prefix         = "openvpn-${var.name}"
   project_id          = var.project_id
   machine_type        = var.machine_type
   disk_size_gb        = var.disk_size_gb
