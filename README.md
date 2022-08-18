@@ -6,16 +6,15 @@ A terraform module to setup OpenVPN on GCP.
 
 ```hcl
 module "openvpn" {
-  source     = "click-ins/openvpn/google"
-  version    = "~>1.0.0"
-  name       = var.name
-  region     = var.region
-  project_id = var.project_id
+  source     = "git@github.com:click-ins/terraform-google-openvpn.git?ref=main"
+
+  name            = var.name
+  region          = var.region
+  project_id      = var.project_id
   host_project_id = var.network_project_id
-  network    = module.vpc.network
-  subnetwork = module.vpc.public_subnetwork
-  output_dir = "${path.module}/openvpn"
-  users      = ["john", "Anna"]
+  network         = var.network
+  subnetwork      = var.public_subnetwork
+  users           = ["john", "Anna"]
 }
 
 ```
