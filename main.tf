@@ -106,16 +106,15 @@ module "instance_template" {
   source  = "terraform-google-modules/vm/google//modules/instance_template"
   version = "~> 7.3"
 
-  name_prefix         = "openvpn-${var.name}"
-  project_id          = var.project_id
-  machine_type        = var.machine_type
-  disk_size_gb        = var.disk_size_gb
-  disk_type           = var.disk_type
-  subnetwork          = var.subnetwork
-  subnetwork_project  = local.host_project_id
-  metadata            = local.metadata
-  enable_shielded_vm  = var.shielded_vm
-  source_image_family = var.image_family
+  name_prefix        = "openvpn-${var.name}"
+  project_id         = var.project_id
+  machine_type       = var.machine_type
+  disk_size_gb       = var.disk_size_gb
+  disk_type          = var.disk_type
+  subnetwork         = var.subnetwork
+  subnetwork_project = local.host_project_id
+  metadata           = local.metadata
+  enable_shielded_vm = var.shielded_vm
   service_account = {
     email  = google_service_account.vm_sa.email
     scopes = ["cloud-platform"]
