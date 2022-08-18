@@ -90,10 +90,14 @@ resource "google_compute_disk" "this" {
   zone  = var.zone
 }
 
+resource "google_service_account" "vm_sa" {
+  project      = var.project_id
+  display_name = "Service Account for openvpn-${var.name} VM"
+}
+
 #-------------------
 # Instance Template
 #-------------------
-
 module "instance_template" {
   source  = "terraform-google-modules/vm/google//modules/instance_template"
   version = "~> 7.3"
@@ -108,6 +112,10 @@ module "instance_template" {
   metadata            = local.metadata
   enable_shielded_vm  = var.shielded_vm
   source_image_family = var.image_family
+  service_account = {
+    email  = google_service_account.vm_sa.email
+    scopes = ["cloud-platform"]
+  }
 
   startup_script = <<SCRIPT
     curl -O ${var.install_script_url}
