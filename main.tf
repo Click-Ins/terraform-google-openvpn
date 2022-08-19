@@ -93,34 +93,63 @@ resource "google_compute_disk" "this" {
   zone  = var.zone
 }
 
-resource "google_service_account" "vm_sa" {
+# resource "google_service_account" "vm_sa" {
+#   project      = var.project_id
+#   account_id   = "openvpn-${var.name}-sa"
+#   display_name = "Service Account for openvpn-${var.name} VM"
+# }
+
+# #-------------------
+# # Instance Template
+# #-------------------
+# module "instance_template" {
+#   source  = "terraform-google-modules/vm/google//modules/instance_template"
+#   version = "~> 7.3"
+
+#   name_prefix        = "openvpn-${var.name}"
+#   project_id         = var.project_id
+#   machine_type       = var.machine_type
+#   disk_size_gb       = var.disk_size_gb
+#   disk_type          = var.disk_type
+#   subnetwork         = var.subnetwork
+#   subnetwork_project = local.host_project_id
+#   metadata           = local.metadata
+#   enable_shielded_vm = var.shielded_vm
+#   service_account = {
+#     email  = google_service_account.vm_sa.email
+#     scopes = ["cloud-platform"]
+#   }
+
+#   startup_script = <<SCRIPT
+#     curl -O ${var.install_script_url}
+#     chmod +x openvpn-install.sh
+#     mv openvpn-install.sh /home/${var.remote_user}/
+#     chown ${var.remote_user}:${var.remote_user} /home/${var.remote_user}/openvpn-install.sh
+#     export AUTO_INSTALL=y
+#     export PASS=1
+#     # Using Custom DNS
+#     export DNS=13
+#     export DNS1="${var.dns_servers[0]}"
+#     %{if length(var.dns_servers) > 1~}
+#     export DNS2="${var.dns_servers[1]}"
+#     %{endif~}
+#     /home/${var.remote_user}/openvpn-install.sh
+#   SCRIPT
+
+#   tags   = local.tags
+#   labels = var.labels
+
+# }
+
+resource "google_compute_instance_template" "tpl" {
+  name_prefix  = "openvpn-${var.name}-"
   project      = var.project_id
-  account_id   = "openvpn-${var.name}-sa"
-  display_name = "Service Account for openvpn-${var.name} VM"
-}
+  machine_type = var.machine_type
+  labels       = var.labels
+  metadata     = local.metadata
+  region       = var.region
 
-#-------------------
-# Instance Template
-#-------------------
-module "instance_template" {
-  source  = "terraform-google-modules/vm/google//modules/instance_template"
-  version = "~> 7.3"
-
-  name_prefix        = "openvpn-${var.name}"
-  project_id         = var.project_id
-  machine_type       = var.machine_type
-  disk_size_gb       = var.disk_size_gb
-  disk_type          = var.disk_type
-  subnetwork         = var.subnetwork
-  subnetwork_project = local.host_project_id
-  metadata           = local.metadata
-  enable_shielded_vm = var.shielded_vm
-  service_account = {
-    email  = google_service_account.vm_sa.email
-    scopes = ["cloud-platform"]
-  }
-
-  startup_script = <<SCRIPT
+  metadata_startup_script = <<SCRIPT
     curl -O ${var.install_script_url}
     chmod +x openvpn-install.sh
     mv openvpn-install.sh /home/${var.remote_user}/
@@ -136,9 +165,39 @@ module "instance_template" {
     /home/${var.remote_user}/openvpn-install.sh
   SCRIPT
 
-  tags   = local.tags
-  labels = var.labels
+  disk {
+    auto_delete = var.auto_delete_disk
+    boot        = true
+    source      = google_compute_disk.this.name
+  }
 
+  dynamic "service_account" {
+    for_each = [var.service_account]
+
+    content {
+      email  = lookup(service_account.value, "email", null)
+      scopes = lookup(service_account.value, "scopes", null)
+    }
+  }
+
+  network_interface {
+    subnetwork         = var.subnetwork
+    subnetwork_project = local.host_project_id
+    dynamic "access_config" {
+      for_each = local.access_config
+
+      content {
+        nat_ip       = access_config.value.nat_ip
+        network_tier = access_config.value.network_tier
+      }
+    }
+  }
+
+  tags = local.tags
+
+  lifecycle {
+    create_before_destroy = "true"
+  }
 }
 
 resource "google_compute_instance_from_template" "this" {
@@ -154,7 +213,7 @@ resource "google_compute_instance_from_template" "this" {
       network_tier = var.network_tier
     }
   }
-  source_instance_template = module.instance_template.self_link
+  source_instance_template = google_compute_instance_template.tpl.self_link
 }
 
 # Updates/creates the users VPN credentials on the VPN server
