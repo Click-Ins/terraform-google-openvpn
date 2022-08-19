@@ -131,3 +131,15 @@ variable "shielded_vm" {
   description = "Enable shielded VM on the openvpn server (recommended)"
   default     = true
 }
+
+variable "create_ssh_fw_rule" {
+  description = "Indicates whether to create SSH Firewall rule"
+  type        = bool
+  default     = false
+}
+
+variable "ssh_source_ranges" {
+  description = "SSH IP ranges allowed to ssh to openvpn server"
+  type        = list(string)
+  default     = []
+}

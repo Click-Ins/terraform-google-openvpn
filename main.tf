@@ -22,6 +22,8 @@ locals {
 }
 
 resource "google_compute_firewall" "allow-external-ssh" {
+  count = var.create_ssh_fw_rule ? 1 : 0
+
   name        = "openvpn-${var.name}-allow-external-ssh"
   project     = local.host_project_id
   network     = var.network
@@ -32,7 +34,7 @@ resource "google_compute_firewall" "allow-external-ssh" {
     ports    = ["22"]
   }
 
-  source_ranges = ["0.0.0.0/0"]
+  source_ranges = var.ssh_source_ranges
   target_tags   = local.ssh_tag
 }
 
@@ -55,7 +57,6 @@ resource "google_compute_firewall" "allow-openvpn-udp-port" {
   source_ranges = ["0.0.0.0/0"]
   target_tags   = local.openvpn_tag
 }
-
 
 resource "google_compute_address" "default" {
   name         = "openvpn-${var.name}-global-ip"
@@ -92,54 +93,6 @@ resource "google_compute_disk" "this" {
   type  = var.disk_type
   zone  = var.zone
 }
-
-# resource "google_service_account" "vm_sa" {
-#   project      = var.project_id
-#   account_id   = "openvpn-${var.name}-sa"
-#   display_name = "Service Account for openvpn-${var.name} VM"
-# }
-
-# #-------------------
-# # Instance Template
-# #-------------------
-# module "instance_template" {
-#   source  = "terraform-google-modules/vm/google//modules/instance_template"
-#   version = "~> 7.3"
-
-#   name_prefix        = "openvpn-${var.name}"
-#   project_id         = var.project_id
-#   machine_type       = var.machine_type
-#   disk_size_gb       = var.disk_size_gb
-#   disk_type          = var.disk_type
-#   subnetwork         = var.subnetwork
-#   subnetwork_project = local.host_project_id
-#   metadata           = local.metadata
-#   enable_shielded_vm = var.shielded_vm
-#   service_account = {
-#     email  = google_service_account.vm_sa.email
-#     scopes = ["cloud-platform"]
-#   }
-
-#   startup_script = <<SCRIPT
-#     curl -O ${var.install_script_url}
-#     chmod +x openvpn-install.sh
-#     mv openvpn-install.sh /home/${var.remote_user}/
-#     chown ${var.remote_user}:${var.remote_user} /home/${var.remote_user}/openvpn-install.sh
-#     export AUTO_INSTALL=y
-#     export PASS=1
-#     # Using Custom DNS
-#     export DNS=13
-#     export DNS1="${var.dns_servers[0]}"
-#     %{if length(var.dns_servers) > 1~}
-#     export DNS2="${var.dns_servers[1]}"
-#     %{endif~}
-#     /home/${var.remote_user}/openvpn-install.sh
-#   SCRIPT
-
-#   tags   = local.tags
-#   labels = var.labels
-
-# }
 
 resource "google_compute_instance_template" "tpl" {
   name_prefix  = "openvpn-${var.name}-"
