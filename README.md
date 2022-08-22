@@ -96,5 +96,6 @@ No modules.
 
 | Name | Description |
 |------|-------------|
+| <a name="output_public_ip"></a> [public\_ip](#output\_public\_ip) | Public IP for of the openvpn server |
 | <a name="output_users"></a> [users](#output\_users) | Created Users |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
